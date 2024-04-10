@@ -1,5 +1,6 @@
 import json
 import uuid
+from collections import Counter
 
 from flask import Flask, request, jsonify
 import redis
@@ -102,6 +103,43 @@ def add_item_to_cart(cart_id):
 
     else:
         return "Cart does not exists!"
+
+
+@app.route('/cart/analytics/items/count', methods=['GET'])
+def get_shopping_carts_with_items_count():
+    keys = redis_cache.keys('*')
+    carts_with_items = sum(1 for key in keys if json.loads(redis_cache.get(key))['items'])
+    return jsonify({"count": carts_with_items})
+
+
+@app.route('/cart/analytics/items', methods=['GET'])
+def get_max_min_avg_cart_items():
+    keys = redis_cache.keys('*')  # Get all keys in Redis
+    list_items_count = [len(json.loads(redis_cache.get(key))['items']) for key in keys if json.loads(redis_cache.get(key))['items']]
+
+    if not list_items_count:
+        return jsonify({"message": "No items found in any shopping cart"}), 404
+
+    return jsonify({"max_items": max(list_items_count), "min_items": min(list_items_count),
+                    "avg_items": sum(list_items_count)/len(list_items_count)})
+
+
+@app.route('/cart/analytics/top-items', methods=['GET'])
+def get_top_items_in_shopping_cart():
+    keys = redis_cache.keys('*')
+    all_items_of_carts = []
+
+    # list.extend is to join the elements of two list in one
+    for key in keys:
+        items = json.loads(redis_cache.get(key))['items']
+        all_items_of_carts.extend((item['item_id'], item['name'], item['price']) for item in items)
+
+    if not all_items_of_carts:
+        return jsonify({"message": "No items found in any shopping cart"}), 404
+
+    # https://docs.python.org/3/library/collections.html
+    top_items = Counter(all_items_of_carts).most_common(5)
+    return jsonify({"top_items": top_items})
 
 
 def _exists_cart(id):
