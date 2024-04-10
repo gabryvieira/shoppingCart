@@ -1,0 +1,200 @@
+openapi: 3.0.0
+info:
+  title: Shopping Cart API
+  version: 1.0.0
+paths:
+  /cart/:
+    post:
+      summary: Create a new shopping cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShoppingCart'
+  /cart/detail/{cart_id}:
+    get:
+      summary: Get details of a specific shopping cart
+      parameters:
+        - in: path
+          name: cart_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShoppingCart'
+        '404':
+          description: Cart not found
+  /cart/list:
+    get:
+      summary: List all shopping carts
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ShoppingCart'
+  /cart/update/{cart_id}:
+    put:
+      summary: Update a specific shopping cart
+      parameters:
+        - in: path
+          name: cart_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '204':
+          description: Cart updated successfully
+        '404':
+          description: Cart does not exist
+  /cart/{cart_id}:
+    delete:
+      summary: Delete a specific shopping cart
+      parameters:
+        - in: path
+          name: cart_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Cart deleted successfully
+        '404':
+          description: Cart does not exist
+  /cart/{cart_id}/item/add:
+    post:
+      summary: Add an item to a specific shopping cart
+      parameters:
+        - in: path
+          name: cart_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                price:
+                  type: number
+      responses:
+        '200':
+          description: Item added successfully
+        '404':
+          description: Cart does not exist
+  /cart/analytics/items/count:
+    get:
+      summary: Get the number of shopping carts with items
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+        '404':
+          description: No items found in any shopping cart
+  /cart/analytics/items:
+    get:
+      summary: Get maximum, minimum, and average items in shopping carts
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  max_items:
+                    type: integer
+                  min_items:
+                    type: integer
+                  avg_items:
+                    type: number
+        '404':
+          description: No items found in any shopping cart
+  /cart/analytics/top-items:
+    get:
+      summary: Get top items in shopping carts
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  top_items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        item_id:
+                          type: string
+                        name:
+                          type: string
+                        price:
+                          type: number
+                        count:
+                          type: integer
+        '404':
+          description: No items found in any shopping cart
+components:
+  schemas:
+    ShoppingCart:
+      type: object
+      properties:
+        cart_id:
+          type: string
+        name:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+    Item:
+      type: object
+      properties:
+        item_id:
+          type: string
+        name:
+          type: string
+        price:
+          type: number
