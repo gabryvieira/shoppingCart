@@ -1,13 +1,17 @@
 import json
 import uuid
+import redis
 from collections import Counter
 
-from flask import Flask, request, jsonify
-import redis
+from flask import Flask, request, jsonify, send_from_directory
+from flasgger import Swagger
+
 from dto.Item import Item
 from dto.ShoppingCart import ShoppingCart
 
 app = Flask(__name__)
+swagger = Swagger(app, template_file="documentation/swagger.yml")
+
 app.config.from_object('config.Config')  # configuration variables to the flask app
 
 redis_cache = redis.Redis(host=app.config["CACHE_REDIS_HOST"], port=app.config["CACHE_REDIS_PORT"],
@@ -144,6 +148,11 @@ def get_top_items_in_shopping_cart():
 
 def _exists_cart(id):
     return redis_cache.get(id)
+
+
+# @app.route('/api-docs')
+# def swagger_ui():
+#     return send_from_directory('documentation', 'swagger.yaml')
 
 
 if __name__ == '__main__':
