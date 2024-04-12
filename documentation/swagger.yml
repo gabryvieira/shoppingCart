@@ -5,6 +5,7 @@ paths:
   /cart/:
     post:
       summary: Create a shopping cart
+      operationId: createCart
       requestBody:
         required: true
         content:
@@ -20,10 +21,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#./dto/ShoppingCart'
+                $ref: '#/components/schemas/ShoppingCart'
   /cart/detail/{cart_id}:
     get:
-      summary: Get details of a specific shopping cart
+      summary: Get details of a shopping cart
       parameters:
         - in: path
           name: cart_id
@@ -58,7 +59,7 @@ paths:
                       $ref: '#/components/schemas/ShoppingCart'
   /cart/update/{cart_id}:
     put:
-      summary: Update a specific shopping cart
+      summary: Update a shopping cart
       parameters:
         - in: path
           name: cart_id
@@ -78,7 +79,7 @@ paths:
           description: Cart does not exist
   /cart/{cart_id}:
     delete:
-      summary: Delete a specific shopping cart
+      summary: Delete a shopping cart
       parameters:
         - in: path
           name: cart_id
@@ -92,7 +93,7 @@ paths:
           description: Cart does not exist
   /cart/{cart_id}/item/add:
     post:
-      summary: Add an item to a specific shopping cart
+      summary: Add an item to a shopping cart
       parameters:
         - in: path
           name: cart_id
@@ -109,4 +110,91 @@ paths:
                 name:
                   type: string
                 price:
-                  type
+                  type: number
+      responses:
+        '200':
+          description: Item added successfully
+        '404':
+          description: Cart does not exist
+  /cart/analytics/items/count:
+    get:
+      summary: Get the number of shopping carts with items
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+        '404':
+          description: No items found in any shopping cart
+  /cart/analytics/items:
+    get:
+      summary: Get maximum, minimum, and average items in shopping carts
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  max_items:
+                    type: integer
+                  min_items:
+                    type: integer
+                  avg_items:
+                    type: number
+        '404':
+          description: No items found in any shopping cart
+  /cart/analytics/top-items:
+    get:
+      summary: Get top items in shopping carts
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  top_items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        item_id:
+                          type: string
+                        name:
+                          type: string
+                        price:
+                          type: number
+                        count:
+                          type: integer
+        '404':
+          description: No items found in any shopping cart
+components:
+  schemas:
+    ShoppingCart:
+      type: object
+      properties:
+        cart_id:
+          type: string
+        name:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+    Item:
+      type: object
+      properties:
+        item_id:
+          type: string
+        name:
+          type: string
+        price:
+          type: number

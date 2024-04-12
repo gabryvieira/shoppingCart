@@ -3,7 +3,7 @@ import uuid
 import redis
 from collections import Counter
 
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify
 from flasgger import Swagger
 
 from dto.Item import Item
@@ -39,10 +39,8 @@ def get_cart_details(cart_id):
         cart_details = redis_cache.get(cart_id)
         cart_details_str = cart_details.decode('utf-8')
 
-        # Return cart details as JSON
         return jsonify(json.loads(cart_details_str))
 
-        # Return appropriate response if cart does not exist
     return jsonify({"message": "Cart not found"}), 404
 
 
@@ -148,11 +146,6 @@ def get_top_items_in_shopping_cart():
 
 def _exists_cart(id):
     return redis_cache.get(id)
-
-
-# @app.route('/api-docs')
-# def swagger_ui():
-#     return send_from_directory('documentation', 'swagger.yaml')
 
 
 if __name__ == '__main__':
